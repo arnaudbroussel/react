@@ -47,6 +47,14 @@ class Field extends React.Component {
     }
 }
 
+// this is another way to create a component using a function and not a class
+function Checkbox({name, value, onChange, children}) {
+    return <div className="form-check">
+        <input type="checkbox" checked={value} onChange={onChange} id={name} name={name} className="form-check-input"/>
+        <label htmlFor={name} className="form-check-label">{children}</label>
+    </div>
+}
+
 class Home extends React.Component {
 
     constructor (props) {
@@ -57,6 +65,7 @@ class Home extends React.Component {
             newsletter: false
         }
         this.handleChange = this.handleChange.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
     }
 
     handleChange (e) {
@@ -68,10 +77,23 @@ class Home extends React.Component {
         })
     }
 
+    handleSubmit (e) {
+        e.preventDefault()
+        const data = JSON.stringify(this.state)
+        console.log(data)
+        this.setState({
+            nom: '',
+            prenom: '',
+            newsletter: false            
+        })
+    }
+
     render () {
         console.log('render')
-        return <div className="container">
-            <Field name="myname" value={this.state.nom} onChange={this.handleChange}>Nom</Field>
+        return <form className="container" onSubmit={this.handleSubmit}>
+            <Field name="nom" value={this.state.nom} onChange={this.handleChange}>Nom</Field>
+            <Field name="prenom" value={this.state.prenom} onChange={this.handleChange}>Prénom</Field>
+            <Checkbox name="newsletter" value={this.state.newsletter} onChange={this.handleChange}>Newsletter</Checkbox>
             <div>
                 <label htmlFor="nom">Nom</label>
                 <input type="text" value={this.state.nom} onChange={this.handleChange} id="nom" name="nom"/>
@@ -84,8 +106,11 @@ class Home extends React.Component {
                 <label htmlFor="prenom">Subscribe to the newsletter ?</label>
                 <input type="checkbox" checked={this.state.newsletter} onChange={this.handleChange} id="newsletter" name="newsletter"/>
             </div>
+            <div className="form-group">
+                <button className="btn btn-primary">Send</button>
+            </div>
             {JSON.stringify(this.state)}
-        </div>    
+        </form>    
     }
 }
 
