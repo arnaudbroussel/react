@@ -7,13 +7,25 @@ const PRODUCTS = [
     {category: "Electronics", price: "$199.99", stocked: true, name: "Nexus 7"}
   ];
 
-function ProductRow ({product}) {
+function ProductRowComponent ({product}) {
     const name = product.stocked ? product.name : <span className="text-danger">{product.name}</span>
+
+    console.log('render')
+    // this render of a product only occurs when it needs to
+    // for example:
+    //      the initial render = 6 to display the 6 initial elements
+    //      when the "on stock only" is clicked, only 4 items remain but they are not displayed (rendered) 
+    //      again because they are already there
+    //      when when the "on stock only" is clicked AGAIN to show also the product not in stock,
+    //      we get 2 more renders for the items that have been removed on the first click on "on stock only" option box.
+
     return <tr>
         <td>{name}</td>        
         <td>{product.price}</td>        
     </tr>
 }
+
+const ProductRow = React.memo(ProductRowComponent)
 
 function ProductCategoryRow ({category}) {
     return <tr>
@@ -34,6 +46,12 @@ function ProductTable ({products, inStockOnly, filterText}) {
             rows.push(<ProductCategoryRow key={lastCategory} category={lastCategory}/>)
         }
         rows.push(<ProductRow key={product.name} product={product}/>)
+
+        // attention:
+        //      if a callback is defined in the render (see 'onClick' below), it defined a new version of the function inside every time,    
+        //      so the renders are not memorized and so re-rendered every time.
+        //      example:
+        //          rows.push(<ProductRow onClick={() => this.demo = 1} key={product.name} product={product}/>)
     });
 
     return <table className="table">
@@ -47,7 +65,7 @@ function ProductTable ({products, inStockOnly, filterText}) {
     </table>
 }
 
-class SearchBar extends React.Component {
+class SearchBar extends React.PureComponent {
 
     constructor (props) {
         super(props)
@@ -82,7 +100,7 @@ class FilterableProductTable extends React.Component {
     constructor (props) {
         super(props)
         this.state = {
-            filterText: 'Foot',
+            filterText: '',
             inStockOnly: false
         }
         this.handleFilterTextChange = this.handleFilterTextChange.bind(this)
@@ -119,3 +137,23 @@ ReactDOM.render(
     <FilterableProductTable products={PRODUCTS}/>, 
     document.getElementById('app')
 )
+
+const PRODUCTS2 = [
+    {category: "Sporting Goods", price: "$49.99", stocked: true, name: "Football"},
+    {category: "Sporting Goods", price: "$9.99", stocked: true, name: "Baseball"},
+    {category: "Sporting Goods", price: "$29.99", stocked: false, name: "Basketball"},
+    {category: "Electronics", price: "$99.99", stocked: true, name: "iPod Touch"},
+    {category: "Electronics", price: "$399.99", stocked: false, name: "iPhone 5"},
+    {category: "Electronics", price: "$199.99", stocked: true, name: "Nexus 7"},
+    {category: "Ordi", price: "$20.99", stocked: true, name: "MO5"}
+  ];
+
+window.setTimeout(function() {
+    ReactDOM.render(
+        <FilterableProductTable products={PRODUCTS2}/>, 
+        document.getElementById('app')
+    )    
+}, 3000)
+
+// [...PRODUCTS, {new element}] --> add an item at the end of an array
+// [{new element}, ...PRODUCTS] --> add an item at the begining of an array
